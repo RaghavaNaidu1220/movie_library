@@ -53,7 +53,7 @@ app.post("/register", async (req, res) => {
     res.redirect("/login.html");
   } catch (error) {
     console.error("Error saving user:", error.message);
-    res.status(500).send("Internal server error");
+    res.status(500).send("Internal server error raghava");
   }
 });
 

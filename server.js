@@ -131,6 +131,7 @@ app.post("/privacyForm", async (req, res) => {
     // Update the user's playlist based on privacy
     if (privacy === "public") {
       user.publicPlaylist.push(movieId);
+      await user.save();
     } else if (privacy === "private") {
       user.privatePlaylist.push(movieId);
     } else {
@@ -138,7 +139,7 @@ app.post("/privacyForm", async (req, res) => {
     }
 
     // Save the updated user document
-    await user.save();
+    
     return res.redirect("/home.html");
     console.log("User playlist updated successfully:", user);
     res.sendStatus(200);

@@ -2,6 +2,9 @@ const movieSearchBox = document.getElementById('movie-search-box');
 const searchButton = document.getElementById('search-button');
 const searchList = document.getElementById('search-list');
 const resultGrid = document.getElementById('result-grid');
+const public = document.getElementById('public_list');
+const private = document.getElementById('private_list');
+
 
 // Load movies from API
 async function loadMovies(searchTerm){
@@ -29,6 +32,9 @@ function findMovies(){
     }
 }
 
+function findPublic(){
+
+}
 // Display movie list
 function displayMovieList(movies){
     searchList.innerHTML = "";
@@ -88,16 +94,32 @@ function displayMovieDetails(details){
         <p class="plot"><b>Plot:</b> ${details.Plot}</p>
         <p class="language"><b>Language:</b> ${details.Language}</p>
         <p class="awards"><b><i class="fas fa-award"></i></b> ${details.Awards}</p>
-        <div class="playlist">
-            <a href="/playlist.html"> Add to playlist </a>
-        </div>
+        <body>
+   <br>
+   <form id="privacyForm" action="/privacyForm" method="POST"">
+    <div class="custom-select">
+        
     </div>
+    <input type="hidden" id="movieId" name="movieId" value="${details.Title}">
+    
+    <div class="custom-select">
+  <select id="privacy" name="privacy">
+    <option value="">Select privacy</option>
+    <option value="public">Public</option>
+    <option value="private">Private</option>
+  </select>
+</div>
+    <button type="submit" id="addToPublist">Add to Playlist</button>
+   
+</form>
+
+
     `;
 }
 
 // Search button event listener
 searchButton.addEventListener('click', findMovies);
-
+public.addEventListener('click',findPublic);
 // Hide search list when clicking outside
 window.addEventListener('click', (event) => {
     if(event.target.className != "form-control" && event.target.id != "search-button"){
@@ -106,32 +128,3 @@ window.addEventListener('click', (event) => {
 });
 
 
-document.getElementById('privacyForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    
-    const formData = new FormData(event.target);
-    const privacy = formData.get('privacy');
-    const movieId = formData.get('movieId');
-    const email = localStorage.getItem('userEmail'); // Assuming user's email is stored in local storage after login
-
-    if (!email) {
-        console.error('User email not found in local storage');
-        return;
-    }
-
-    const response = await fetch('/addToPlaylist', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ email, movieId, privacy })
-    });
-
-    if (response.ok) {
-        console.log('Movie added to playlist successfully');
-        // Redirect or show success message
-    } else {
-        console.error('Failed to add movie to playlist');
-        // Show error message
-    }
-});

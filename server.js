@@ -11,7 +11,7 @@ app.use(express.static("public"));
 
 mongoose.connect("mongodb+srv://admin:1234@cluster0.dsdkxea.mongodb.net/testing", {
   useUnifiedTopology: true,
-  useNewUrlParser: true
+  // useNewUrlParser: true
 }).then(() => {
   console.log("Connected to MongoDB");
 }).catch((error) => {

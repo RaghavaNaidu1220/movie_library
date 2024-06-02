@@ -9,9 +9,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve static files from the public directory
 app.use(express.static("public"));
 
-mongoose.connect("mongodb+srv://admin:1234@cluster0.dsdkxea.mongodb.net/testing", {
-  useUnifiedTopology: true,
-  // useNewUrlParser: true
+mongoose.connect("mongodb+srv://admin:1234@cluster0.dsdkxea.mongodb.net/testing?retryWrites=true&w=majority&appName=Cluster0", {
+  
 }).then(() => {
   console.log("Connected to MongoDB");
 }).catch((error) => {

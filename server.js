@@ -124,17 +124,16 @@ app.post("/privacyForm", async (req, res) => {
       return res.status(400).send("Invalid privacy option");
     }
 
-<<<<<<< HEAD
+
     await user.save();
     res.redirect("/home.html");
-=======
+
     // Save the updated user document
     
     return res.redirect("/home.html");
     console.log("User playlist updated successfully:", user);
     res.sendStatus(200);
-    
->>>>>>> 8078366ba74ad10e1953a4f1339744775aa54fe9
+  
   } catch (error) {
     console.error("Error adding movie to playlist:", error);
     res.status(500).send("Internal server error");

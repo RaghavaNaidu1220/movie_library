@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
 
             // Redirect to login page after successful logout
-            window.location.href = "/login.html";
+            window.location.href = "/";
         } catch (error) {
             console.error("Error during logout:", error.message);
             // Handle logout failure if needed

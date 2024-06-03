@@ -17,32 +17,13 @@
         <div class="logo">
             <div class="container">
                 <br/>
-                <p class="logo-container">Movie<span> Library</span></p>
-            
-            
-                <form id="playlist"><table><tr>
-                    <button id="playlist" style="background-color: #4c78bf; /* Green */
-                    border: none;
-                    color: white;
-                    padding: 15px 32px;
-                    text-align: center;
-                    text-decoration: none;
-                    display: inline-block;
-                    font-size: 16px;
-                    margin: 4px 2px;
-                    cursor: pointer;">Public List </button>|</form> <button id="playlist" style="background-color: #4c78bf; /* Green */
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;">Private List </button>|<form id="logout-form" action="/logout" method="POST">
-    <button type="submit">Logout</button>
-</form></tr></table>
-              
+                <p class="logo-container" ><a href="home.html"><span style="color:white">Movie</span><span> Library</span></a></p>
+               
+                    <button id="public-playlist" style="background-color: #4c78bf; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">Public List</button>
+                |
+                <button id="private-playlist" style="background-color: #4c78bf; border: none; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer;">Private List</button><form id="logout-form" action="/logout" method="POST">
+                    <button type="submit">Logout</button>
+                </form>
                 
             </div>
         </div>
@@ -52,27 +33,17 @@
             <div class="search-element">
                 <h3>Search Movie:</h3>
                 <input type="text" class="form-control" placeholder="Search Movie Title ..." id="movie-search-box">
-                <button id="search-button">search
-                   <!-- search <img height='40' width="40" src="search-icon.png" alt="Button Image"> -->
-                </button>
-                
-
-              <grid><div class="search-list hide-search-list" id="search-list"></div></grid>  
+                <button id="search-button">search</button>
+                <div class="search-list hide-search-list" id="search-list"></div>
             </div>
         </div>
         <!-- End of search container -->
-
         <!-- Result container -->
         <div class="container">
             <div class="result-container">
-                <div class="result-grid" id="result-grid">
-                    <!-- Movie information here -->
-                </div>
+                <div class="result-grid" id="result-grid"></div>
             </div>
         </div>
-        
-          
-        <!-- End of result container -->
     </div>
 </body>
 </html>

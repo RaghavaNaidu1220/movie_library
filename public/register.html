@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="main.css">
     <link href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    
 </head>
 <body>
     <div class="wrapper">
@@ -33,6 +32,23 @@
             <p>Already have an account? <a href="/login.html">Login</a></p>
         </div>
     </div>
-    <!-- <script src="auth.js"></script> -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.has('error')) {
+                const errorMessage = params.get('error') === 'email' ? "Email already exists" : "An error occurred";
+                Toastify({
+                    text: errorMessage,
+                    duration: 5000,
+                    close: true,
+                    gravity: "top", // `top` or `bottom`
+                    position: "center", // `left`, `center` or `right`
+                    backgroundColor: "red",
+                    stopOnFocus: true // Prevents dismissing of toast on hover
+                }).showToast();
+            }
+        });
+    </script>
 </body>
 </html>

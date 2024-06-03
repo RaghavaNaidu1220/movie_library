@@ -2,13 +2,14 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
-
-// const express = require("express");
-const session = require("express-session"); // Add this line
+const session = require("express-session");
+const fetch = require("node-fetch");
 
 const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
 // Set up session middleware
 app.use(session({
@@ -16,14 +17,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false
 }));
-app.use(express.urlencoded({ extended: true }));
-
-
-// Serve static files from the public directory
-app.use(express.static("public"));
 
 mongoose.connect("mongodb+srv://admin:1234@cluster0.dsdkxea.mongodb.net/testing?retryWrites=true&w=majority&appName=Cluster0", {
-  
 }).then(() => {
   console.log("Connected to MongoDB");
 }).catch((error) => {
@@ -38,9 +33,6 @@ const userSchema = new mongoose.Schema({
   publicPlaylist: [String],
   privatePlaylist: [String]
 });
-const User = mongoose.model("User", userSchema);
-
-
 const Note = mongoose.model("Note", userSchema);
 
 app.get("/", (req, res) => {
@@ -50,23 +42,33 @@ app.get("/", (req, res) => {
 app.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
- 
-
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    let newNote = new Note({
+    let newUser = new User({
       username: name,
       email: email,
       password: hashedPassword
     });
 
-    await newNote.save();
+    await newUser.save();
     res.redirect("/login.html");
   } catch (error) {
-    console.error("Error saving user:", error.message);
-    res.status(500).send("Internal server error raghava");
+   
+      // Duplicate email error
+      return res.redirect("/register.html");
+    
+    
   }
+});
+app.post("/logout", (req, res) => {
+  req.session.destroy(err => {
+      if (err) {
+          console.error("Error destroying session:", err);
+          return res.status(500).send("Internal server error");
+      }
+      res.redirect("/login.html"); // Redirect to login page after logout
+  });
 });
 
 app.post("/login", async (req, res) => {
@@ -75,60 +77,44 @@ app.post("/login", async (req, res) => {
   try {
     const user = await Note.findOne({ email: email });
 
-    console.log("User from database:", user);
-
     if (!user) {
-      console.log("User not found");
-      return res.status(400).send("Invalid email or password");
+      
+      return res.redirect("/login.html");
     }
-
-    console.log("Stored hashed password:", user.password);
 
     const isMatch = await bcrypt.compare(password, user.password);
 
-    console.log("Password comparison result:", isMatch);
-    
     if (!isMatch) {
-      console.log("Password doesn't match");
-      // return res.status(400).send("Invalid email or password");
-      return res.redirect("/login.html");
-    }
+     
+
+      
+    return res.redirect("/login.html");
     
-    // If password matches, redirect to home
-    return res.redirect("/home.html");
-   
+    }
+
+    req.session.email = email; // Save user email in session
+    res.redirect("/home.html");
   } catch (error) {
     console.error("Error during authentication:", error.message);
-    return res.status(500).send("Internal server error");
+    res.status(500).send("Internal server error");
   }
 });
 
-
-
-  
-// app.post("/playlist",async (req,res)=>{
-//   const 
-// })
-
-
 app.post("/privacyForm", async (req, res) => {
-  const {  movieId, privacy } = req.body;
-  const email = req.session.email;
+  const { movieId, privacy } = req.body;
+  const email = req.session.email; // Get the email from session
+
   try {
-    // Check if the email is valid
     if (!email) {
-      return res.status(400).send(email);
+      return res.status(400).send("Email not found in session");
     }
 
-    // Find the user by email address
     const user = await Note.findOne({ email: email.trim() });
 
     if (!user) {
-      console.log("User not found for email:", email);
-      return res.status(404).send("User not foupppnd");
+      return res.status(404).send("User not found");
     }
 
-    // Update the user's playlist based on privacy
     if (privacy === "public") {
       user.publicPlaylist.push(movieId);
     } else if (privacy === "private") {
@@ -137,61 +123,99 @@ app.post("/privacyForm", async (req, res) => {
       return res.status(400).send("Invalid privacy option");
     }
 
-    // Save the updated user document
     await user.save();
-    return res.redirect("/home.html");
-    console.log("User playlist updated successfully:", user);
-    res.sendStatus(200);
-    
+    res.redirect("/home.html");
   } catch (error) {
     console.error("Error adding movie to playlist:", error);
     res.status(500).send("Internal server error");
   }
 });
+
 app.post("/playlist", async (req, res) => {
-  // Assuming you have authenticated the user and obtained their email
-  const userEmail = req.session.email; // Assuming you have a form input with name="email"
+  const userEmail = req.session.email;
 
   try {
-      // Find the user in the database
-      const user = await User.findOne({ email: userEmail });
+    const user = await Note.findOne({ email: userEmail });
 
-      if (!user) {
-          return res.status(404).json({ message: "User not found" });
-      }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-      // Extract movie titles from public and private playlists
-      const publicTitles = user.publicPlaylist;
-      const privateTitles = user.privatePlaylist;
-      console.log(privateTitles);
-      // Render the titles in a grid format
-      res.send(`
-          <h2>Public Playlist</h2>
-          <div class="grid-container">
-              ${publicTitles.map(title => `<div class="grid-item">${title}</div>`).join("")}
-          </div>
-          <h2>Private Playlist</h2>
-          <div class="grid-container">
-              ${privateTitles.map(title => `<div class="grid-item">${title}</div>`).join("")}
-          </div>
-      `);
+    const publicTitles = user.publicPlaylist;
+    const privateTitles = user.privatePlaylist;
+
+    // Fetch movie details from OMDB API
+    const fetchMovieDetails = async (title) => {
+      const response = await fetch(`https://www.omdbapi.com/?s=${title}&apikey=a5163edc`);
+      const data = await response.json();
+      return data;
+    };
+
+    const publicMovies = await Promise.all(publicTitles.map(fetchMovieDetails));
+    const privateMovies = await Promise.all(privateTitles.map(fetchMovieDetails));
+
+    // Generate the HTML content
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Playlists</title>
+        <style>
+          .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+          }
+          .grid-item {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: center;
+            background-color: #f9f9f9;
+          }
+          .movie-poster {
+            width: 100%;
+            height: auto;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Public Playlist</h2>
+        <div class="grid-container">
+          ${publicMovies.map(movie => `
+            <div class="grid-item">
+              <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" />
+              <h3>${movie.Title}</h3>
+              <p>${movie.Year}</p>
+              <p>${movie.Genre}</p>
+            </div>
+          `).join('')}
+        </div>
+        <h2>Private Playlist</h2>
+        <div class="grid-container">
+          ${privateMovies.map(movie => `
+            <div class="grid-item">
+              <img src="${movie.Poster}" alt="${movie.Title}" class="movie-poster" />
+              <h3>${movie.Title}</h3>
+              <p>${movie.Year}</p>
+              <p>${movie.Genre}</p>
+            </div>
+          `).join('')}
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Send the HTML content
+    res.send(htmlContent);
   } catch (error) {
-      console.error("Error retrieving playlist:", error);
-      res.status(500).json({ message: "Internal server error" });
+    console.error("Error retrieving playlist:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-
-// Start the server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-
-// app.listen(3000, () => {
-//   console.log("Server connected on port 3000");
-// });
-
-
-

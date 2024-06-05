@@ -21,12 +21,12 @@ To run this project locally, follow these steps:
 
 1. **Clone the Repository**:
     ```bash
-    git clone https://github.com/your-username/your-project.git
+    git clone https://github.com/your-username/Movie-Library.git
     ```
 
 2. **Navigate to the Project Directory**:
     ```bash
-    cd your-project
+    cd bot
     ```
 
 3. **Install Dependencies**:
